@@ -14,6 +14,7 @@ async function RightSidebar() {
     pageSize: 4,
   });
 
+
   const suggestedCOmmunities = await fetchCommunities({ pageSize: 4 });
 
   return (

@@ -42,6 +42,8 @@ export async function updateUser({
   try {
     connectToDB();
 
+    console.log("running this");
+
     await User.findOneAndUpdate(
       { id: userId },
       {
