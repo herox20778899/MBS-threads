@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { connectToDB } from "../mongoose";
 
 import User from "../models/user.model";
-import Thread from "../models/thread.model";
+import Post from "../models/post.model";
 import Community from "../models/community.model";
 
 export async function fetchPosts(pageNumber = 1, pageSize = 20) {
@@ -14,8 +14,8 @@ export async function fetchPosts(pageNumber = 1, pageSize = 20) {
   // Calculate the number of posts to skip based on the page number and page size.
   const skipAmount = (pageNumber - 1) * pageSize;
 
-  // Create a query to fetch the posts that have no parent (top-level threads) (a thread that is not a comment/reply).
-  const postsQuery = Thread.find({ parentId: { $in: [null, undefined] } })
+  // Create a query to fetch the posts that have no parent (top-level posts) (a post that is not a comment/reply).
+  const postsQuery = Post.find({ parentId: { $in: [null, undefined] } })
     .sort({ createdAt: "desc" })
     .skip(skipAmount)
     .limit(pageSize)
@@ -36,8 +36,8 @@ export async function fetchPosts(pageNumber = 1, pageSize = 20) {
       },
     });
 
-  // Count the total number of top-level posts (threads) i.e., threads that are not comments.
-  const totalPostsCount = await Thread.countDocuments({
+  // Count the total number of top-level posts (posts) i.e., posts that are not comments.
+  const totalPostsCount = await Post.countDocuments({
     parentId: { $in: [null, undefined] },
   }); // Get the total count of posts
 
@@ -55,7 +55,7 @@ interface Params {
   path: string,
 }
 
-export async function createThread({ text, author, communityId, path }: Params
+export async function createPost({ text, author, communityId, path }: Params
 ) {
   try {
     connectToDB();
@@ -65,7 +65,7 @@ export async function createThread({ text, author, communityId, path }: Params
       { _id: 1 }
     );
 
-    const createdThread = await Thread.create({
+    const createdPost = await Post.create({
       text,
       author,
       community: communityIdObject, // Assign communityId if provided, or leave it null for personal account
@@ -73,95 +73,95 @@ export async function createThread({ text, author, communityId, path }: Params
 
     // Update User model
     await User.findByIdAndUpdate(author, {
-      $push: { threads: createdThread._id },
+      $push: { posts: createdPost._id },
     });
 
     if (communityIdObject) {
       // Update Community model
       await Community.findByIdAndUpdate(communityIdObject, {
-        $push: { threads: createdThread._id },
+        $push: { posts: createdPost._id },
       });
     }
 
     revalidatePath(path);
   } catch (error: any) {
-    throw new Error(`Failed to create thread: ${error.message}`);
+    throw new Error(`Failed to create post: ${error.message}`);
   }
 }
 
-async function fetchAllChildThreads(threadId: string): Promise<any[]> {
-  const childThreads = await Thread.find({ parentId: threadId });
+async function fetchAllChildPosts(postId: string): Promise<any[]> {
+  const childPosts = await Post.find({ parentId: postId });
 
-  const descendantThreads = [];
-  for (const childThread of childThreads) {
-    const descendants = await fetchAllChildThreads(childThread._id);
-    descendantThreads.push(childThread, ...descendants);
+  const descendantPosts = [];
+  for (const childPost of childPosts) {
+    const descendants = await fetchAllChildPosts(childPost._id);
+    descendantPosts.push(childPost, ...descendants);
   }
 
-  return descendantThreads;
+  return descendantPosts;
 }
 
-export async function deleteThread(id: string, path: string): Promise<void> {
+export async function deletePost(id: string, path: string): Promise<void> {
   try {
     connectToDB();
 
-    // Find the thread to be deleted (the main thread)
-    const mainThread = await Thread.findById(id).populate("author community");
+    // Find the post to be deleted (the main post)
+    const mainPost = await Post.findById(id).populate("author community");
 
-    if (!mainThread) {
-      throw new Error("Thread not found");
+    if (!mainPost) {
+      throw new Error("Post not found");
     }
 
-    // Fetch all child threads and their descendants recursively
-    const descendantThreads = await fetchAllChildThreads(id);
+    // Fetch all child posts and their descendants recursively
+    const descendantPosts = await fetchAllChildPosts(id);
 
-    // Get all descendant thread IDs including the main thread ID and child thread IDs
-    const descendantThreadIds = [
+    // Get all descendant post IDs including the main post ID and child post IDs
+    const descendantPostIds = [
       id,
-      ...descendantThreads.map((thread) => thread._id),
+      ...descendantPosts.map((post) => post._id),
     ];
 
     // Extract the authorIds and communityIds to update User and Community models respectively
     const uniqueAuthorIds = new Set(
       [
-        ...descendantThreads.map((thread) => thread.author?._id?.toString()), // Use optional chaining to handle possible undefined values
-        mainThread.author?._id?.toString(),
+        ...descendantPosts.map((post) => post.author?._id?.toString()), // Use optional chaining to handle possible undefined values
+        mainPost.author?._id?.toString(),
       ].filter((id) => id !== undefined)
     );
 
     const uniqueCommunityIds = new Set(
       [
-        ...descendantThreads.map((thread) => thread.community?._id?.toString()), // Use optional chaining to handle possible undefined values
-        mainThread.community?._id?.toString(),
+        ...descendantPosts.map((post) => post.community?._id?.toString()), // Use optional chaining to handle possible undefined values
+        mainPost.community?._id?.toString(),
       ].filter((id) => id !== undefined)
     );
 
-    // Recursively delete child threads and their descendants
-    await Thread.deleteMany({ _id: { $in: descendantThreadIds } });
+    // Recursively delete child posts and their descendants
+    await Post.deleteMany({ _id: { $in: descendantPostIds } });
 
     // Update User model
     await User.updateMany(
       { _id: { $in: Array.from(uniqueAuthorIds) } },
-      { $pull: { threads: { $in: descendantThreadIds } } }
+      { $pull: { posts: { $in: descendantPostIds } } }
     );
 
     // Update Community model
     await Community.updateMany(
       { _id: { $in: Array.from(uniqueCommunityIds) } },
-      { $pull: { threads: { $in: descendantThreadIds } } }
+      { $pull: { posts: { $in: descendantPostIds } } }
     );
 
     revalidatePath(path);
   } catch (error: any) {
-    throw new Error(`Failed to delete thread: ${error.message}`);
+    throw new Error(`Failed to delete post: ${error.message}`);
   }
 }
 
-export async function fetchThreadById(threadId: string) {
+export async function fetchPostById(postId: string) {
   connectToDB();
 
   try {
-    const thread = await Thread.findById(threadId)
+    const post = await Post.findById(postId)
       .populate({
         path: "author",
         model: User,
@@ -182,7 +182,7 @@ export async function fetchThreadById(threadId: string) {
           },
           {
             path: "children", // Populate the children field within children
-            model: Thread, // The model of the nested children (assuming it's the same "Thread" model)
+            model: Post, // The model of the nested children (assuming it's the same "Post" model)
             populate: {
               path: "author", // Populate the author field within nested children
               model: User,
@@ -193,15 +193,15 @@ export async function fetchThreadById(threadId: string) {
       })
       .exec();
 
-    return thread;
+    return post;
   } catch (err) {
-    console.error("Error while fetching thread:", err);
-    throw new Error("Unable to fetch thread");
+    console.error("Error while fetching post:", err);
+    throw new Error("Unable to fetch post");
   }
 }
 
-export async function addCommentToThread(
-  threadId: string,
+export async function addCommentToPost(
+  postId: string,
   commentText: string,
   userId: string,
   path: string
@@ -209,28 +209,28 @@ export async function addCommentToThread(
   connectToDB();
 
   try {
-    // Find the original thread by its ID
-    const originalThread = await Thread.findById(threadId);
+    // Find the original post by its ID
+    const originalPost = await Post.findById(postId);
 
-    if (!originalThread) {
-      throw new Error("Thread not found");
+    if (!originalPost) {
+      throw new Error("Post not found");
     }
 
-    // Create the new comment thread
-    const commentThread = new Thread({
+    // Create the new comment post
+    const commentPost = new Post({
       text: commentText,
       author: userId,
-      parentId: threadId, // Set the parentId to the original thread's ID
+      parentId: postId, // Set the parentId to the original post's ID
     });
 
-    // Save the comment thread to the database
-    const savedCommentThread = await commentThread.save();
+    // Save the comment post to the database
+    const savedCommentPost = await commentPost.save();
 
-    // Add the comment thread's ID to the original thread's children array
-    originalThread.children.push(savedCommentThread._id);
+    // Add the comment post's ID to the original post's children array
+    originalPost.children.push(savedCommentPost._id);
 
-    // Save the updated original thread to the database
-    await originalThread.save();
+    // Save the updated original post to the database
+    await originalPost.save();
 
     revalidatePath(path);
   } catch (err) {

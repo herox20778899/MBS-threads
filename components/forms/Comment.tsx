@@ -17,29 +17,29 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
-import { CommentValidation } from "@/lib/validations/thread";
-import { addCommentToThread } from "@/lib/actions/thread.actions";
+import { CommentValidation } from "@/lib/validations/post";
+import { addCommentToPost } from "@/lib/actions/post.actions";
 
 interface Props {
-  threadId: string;
+  postId: string;
   currentUserImg: string;
   currentUserId: string;
 }
 
-function Comment({ threadId, currentUserImg, currentUserId }: Props) {
+function Comment({ postId, currentUserImg, currentUserId }: Props) {
   const pathname = usePathname();
 
   const form = useForm<z.infer<typeof CommentValidation>>({
     resolver: zodResolver(CommentValidation),
     defaultValues: {
-      thread: "",
+      post: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof CommentValidation>) => {
-    await addCommentToThread(
-      threadId,
-      values.thread,
+    await addCommentToPost(
+      postId,
+      values.post,
       JSON.parse(currentUserId),
       pathname
     );
@@ -52,7 +52,7 @@ function Comment({ threadId, currentUserImg, currentUserId }: Props) {
       <form className='comment-form' onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           control={form.control}
-          name='thread'
+          name='post'
           render={({ field }) => (
             <FormItem className='flex w-full items-center gap-3'>
               <FormLabel>

@@ -1,7 +1,7 @@
 <div align="center">
   <br />
     <a href="https://youtu.be/O5cmLDVTgAs?feature=shared" target="_blank">
-      <img src="https://github.com/adrianhajdin/threads/assets/151519281/a9cd1088-968b-4b1d-b21a-f5f97d0c202b" alt="Project Banner">
+      <img src="https://github.com/adrianhajdin/posts/assets/151519281/a9cd1088-968b-4b1d-b21a-f5f97d0c202b" alt="Project Banner">
     </a>
   <br />
 
@@ -15,7 +15,7 @@
     <img src="https://img.shields.io/badge/-Typescript-black?style=for-the-badge&logoColor=white&logo=typescript&color=3178C6" alt="typescript" />
   </div>
 
-  <h3 align="center">A full stack Threads Clone</h3>
+  <h3 align="center">A full stack Posts Clone</h3>
 
    <div align="center">
      Build this project step by step with our detailed tutorial on <a href="https://www.youtube.com/@javascriptmastery/videos" target="_blank"><b>JavaScript Mastery</b></a> YouTube. Join the JSM family!
@@ -42,7 +42,7 @@ If you prefer visual learning, this is the perfect resource for you. Follow our 
 
 ## <a name="introduction">🤖 Introduction</a>
 
-Build a full stack Threads clone using Next.js 14+ with a redesigned look transformed from a Figma design, user interaction to community management, technical implementation, and various features, including nested deep comments, notifications, real-time-search, and more.  
+Build a full stack Posts clone using Next.js 14+ with a redesigned look transformed from a Figma design, user interaction to community management, technical implementation, and various features, including nested deep comments, notifications, real-time-search, and more.  
 
 If you're getting started and need assistance or face any bugs, join our active Discord community with over 27k+ members. It's a place where people help each other out.
 
@@ -65,17 +65,17 @@ If you're getting started and need assistance or face any bugs, join our active 
 
 👉 **Authentication**: Authentication using Clerk for email, password, and social logins (Google and GitHub) with a comprehensive profile management system.
 
-👉 **Visually Appealing Home Page**: A visually appealing home page showcasing the latest threads for an engaging user experience.
+👉 **Visually Appealing Home Page**: A visually appealing home page showcasing the latest posts for an engaging user experience.
 
-👉 **Create Thread Page**: A dedicated page for users to create threads, fostering community engagement
+👉 **Create Post Page**: A dedicated page for users to create posts, fostering community engagement
 
-👉 **Commenting Feature**: A commenting feature to facilitate discussions within threads.
+👉 **Commenting Feature**: A commenting feature to facilitate discussions within posts.
 
-👉 **Nested Commenting**: Commenting system with nested threads, providing a structured conversation flow.
+👉 **Nested Commenting**: Commenting system with nested posts, providing a structured conversation flow.
 
 👉 **User Search with Pagination**: A user search feature with pagination for easy exploration and discovery of other users.
 
-👉 **Activity Page**: Display notifications on the activity page when someone comments on a user's thread, enhancing user engagement.
+👉 **Activity Page**: Display notifications on the activity page when someone comments on a user's post, enhancing user engagement.
 
 👉 **Profile Page**: User profile pages for showcasing information and enabling modification of profile settings.
 
@@ -83,11 +83,11 @@ If you're getting started and need assistance or face any bugs, join our active 
 
 👉 **Community Member Management**: A user-friendly interface to manage community members, allowing role changes and removals.
 
-👉 **Admin-Specific Community Threads**: Enable admins to create threads specifically for their community.
+👉 **Admin-Specific Community Posts**: Enable admins to create posts specifically for their community.
 
 👉 **Community Search with Pagination**: A community search feature with pagination for exploring different communities.
 
-👉 **Community Profiles**: Display community profiles showcasing threads and members for a comprehensive overview.
+👉 **Community Profiles**: Display community profiles showcasing posts and members for a comprehensive overview.
 
 👉 **Figma Design Implementation**: Transform Figma designs into a fully functional application with pixel-perfect and responsive design.
 
@@ -126,8 +126,8 @@ Make sure you have the following installed on your machine:
 **Cloning the Repository**
 
 ```bash
-git clone https://github.com/adrianhajdin/threads.git
-cd threads
+git clone https://github.com/adrianhajdin/posts.git
+cd posts
 ```
 
 **Installation**
@@ -388,7 +388,7 @@ export const POST = async (request: Request) => {
 import { FilterQuery, SortOrder } from "mongoose";
 
 import Community from "../models/community.model";
-import Thread from "../models/thread.model";
+import Post from "../models/post.model";
 import User from "../models/user.model";
 
 import { connectToDB } from "../mongoose";
@@ -460,8 +460,8 @@ export async function fetchCommunityPosts(id: string) {
     connectToDB();
 
     const communityPosts = await Community.findById(id).populate({
-      path: "threads",
-      model: Thread,
+      path: "posts",
+      model: Post,
       populate: [
         {
           path: "author",
@@ -470,7 +470,7 @@ export async function fetchCommunityPosts(id: string) {
         },
         {
           path: "children",
-          model: Thread,
+          model: Post,
           populate: {
             path: "author",
             model: User,
@@ -667,8 +667,8 @@ export async function deleteCommunity(communityId: string) {
       throw new Error("Community not found");
     }
 
-    // Delete all threads associated with the community
-    await Thread.deleteMany({ community: communityId });
+    // Delete all posts associated with the community
+    await Post.deleteMany({ community: communityId });
 
     // Find all users who are part of the community
     const communityUsers = await User.find({ communities: communityId });
@@ -794,8 +794,8 @@ export const sidebarLinks = [
   },
   {
     imgURL: "/assets/create.svg",
-    route: "/create-thread",
-    label: "Create Thread",
+    route: "/create-post",
+    label: "Create Post",
   },
   {
     imgURL: "/assets/community.svg",
@@ -810,13 +810,13 @@ export const sidebarLinks = [
 ];
 
 export const profileTabs = [
-  { value: "threads", label: "Threads", icon: "/assets/reply.svg" },
+  { value: "posts", label: "Posts", icon: "/assets/reply.svg" },
   { value: "replies", label: "Replies", icon: "/assets/members.svg" },
   { value: "tagged", label: "Tagged", icon: "/assets/tag.svg" },
 ];
 
 export const communityTabs = [
-  { value: "threads", label: "Threads", icon: "/assets/reply.svg" },
+  { value: "posts", label: "Posts", icon: "/assets/reply.svg" },
   { value: "members", label: "Members", icon: "/assets/members.svg" },
   { value: "requests", label: "Requests", icon: "/assets/request.svg" },
 ];
@@ -862,8 +862,8 @@ export const communityTabs = [
     @apply rounded-lg bg-primary-500 px-5 py-1.5 text-small-regular !text-light-1 !important;
   }
 
-  /* thread card  */
-  .thread-card_bar {
+  /* post card  */
+  .post-card_bar {
     @apply relative mt-2 w-0.5 grow rounded-full bg-neutral-800;
   }
 
@@ -1258,7 +1258,7 @@ module.exports = {
 </details>
 
 <details>
-<summary><code>thread.actions.ts</code></summary>
+<summary><code>post.actions.ts</code></summary>
 
 ```typescript
 "use server";
@@ -1268,7 +1268,7 @@ import { revalidatePath } from "next/cache";
 import { connectToDB } from "../mongoose";
 
 import User from "../models/user.model";
-import Thread from "../models/thread.model";
+import Post from "../models/post.model";
 import Community from "../models/community.model";
 
 export async function fetchPosts(pageNumber = 1, pageSize = 20) {
@@ -1277,8 +1277,8 @@ export async function fetchPosts(pageNumber = 1, pageSize = 20) {
   // Calculate the number of posts to skip based on the page number and page size.
   const skipAmount = (pageNumber - 1) * pageSize;
 
-  // Create a query to fetch the posts that have no parent (top-level threads) (a thread that is not a comment/reply).
-  const postsQuery = Thread.find({ parentId: { $in: [null, undefined] } })
+  // Create a query to fetch the posts that have no parent (top-level posts) (a post that is not a comment/reply).
+  const postsQuery = Post.find({ parentId: { $in: [null, undefined] } })
     .sort({ createdAt: "desc" })
     .skip(skipAmount)
     .limit(pageSize)
@@ -1299,8 +1299,8 @@ export async function fetchPosts(pageNumber = 1, pageSize = 20) {
       },
     });
 
-  // Count the total number of top-level posts (threads) i.e., threads that are not comments.
-  const totalPostsCount = await Thread.countDocuments({
+  // Count the total number of top-level posts (posts) i.e., posts that are not comments.
+  const totalPostsCount = await Post.countDocuments({
     parentId: { $in: [null, undefined] },
   }); // Get the total count of posts
 
@@ -1318,7 +1318,7 @@ interface Params {
   path: string,
 }
 
-export async function createThread({ text, author, communityId, path }: Params
+export async function createPost({ text, author, communityId, path }: Params
 ) {
   try {
     connectToDB();
@@ -1328,7 +1328,7 @@ export async function createThread({ text, author, communityId, path }: Params
       { _id: 1 }
     );
 
-    const createdThread = await Thread.create({
+    const createdPost = await Post.create({
       text,
       author,
       community: communityIdObject, // Assign communityId if provided, or leave it null for personal account
@@ -1336,95 +1336,95 @@ export async function createThread({ text, author, communityId, path }: Params
 
     // Update User model
     await User.findByIdAndUpdate(author, {
-      $push: { threads: createdThread._id },
+      $push: { posts: createdPost._id },
     });
 
     if (communityIdObject) {
       // Update Community model
       await Community.findByIdAndUpdate(communityIdObject, {
-        $push: { threads: createdThread._id },
+        $push: { posts: createdPost._id },
       });
     }
 
     revalidatePath(path);
   } catch (error: any) {
-    throw new Error(`Failed to create thread: ${error.message}`);
+    throw new Error(`Failed to create post: ${error.message}`);
   }
 }
 
-async function fetchAllChildThreads(threadId: string): Promise<any[]> {
-  const childThreads = await Thread.find({ parentId: threadId });
+async function fetchAllChildPosts(postId: string): Promise<any[]> {
+  const childPosts = await Post.find({ parentId: postId });
 
-  const descendantThreads = [];
-  for (const childThread of childThreads) {
-    const descendants = await fetchAllChildThreads(childThread._id);
-    descendantThreads.push(childThread, ...descendants);
+  const descendantPosts = [];
+  for (const childPost of childPosts) {
+    const descendants = await fetchAllChildPosts(childPost._id);
+    descendantPosts.push(childPost, ...descendants);
   }
 
-  return descendantThreads;
+  return descendantPosts;
 }
 
-export async function deleteThread(id: string, path: string): Promise<void> {
+export async function deletePost(id: string, path: string): Promise<void> {
   try {
     connectToDB();
 
-    // Find the thread to be deleted (the main thread)
-    const mainThread = await Thread.findById(id).populate("author community");
+    // Find the post to be deleted (the main post)
+    const mainPost = await Post.findById(id).populate("author community");
 
-    if (!mainThread) {
-      throw new Error("Thread not found");
+    if (!mainPost) {
+      throw new Error("Post not found");
     }
 
-    // Fetch all child threads and their descendants recursively
-    const descendantThreads = await fetchAllChildThreads(id);
+    // Fetch all child posts and their descendants recursively
+    const descendantPosts = await fetchAllChildPosts(id);
 
-    // Get all descendant thread IDs including the main thread ID and child thread IDs
-    const descendantThreadIds = [
+    // Get all descendant post IDs including the main post ID and child post IDs
+    const descendantPostIds = [
       id,
-      ...descendantThreads.map((thread) => thread._id),
+      ...descendantPosts.map((post) => post._id),
     ];
 
     // Extract the authorIds and communityIds to update User and Community models respectively
     const uniqueAuthorIds = new Set(
       [
-        ...descendantThreads.map((thread) => thread.author?._id?.toString()), // Use optional chaining to handle possible undefined values
-        mainThread.author?._id?.toString(),
+        ...descendantPosts.map((post) => post.author?._id?.toString()), // Use optional chaining to handle possible undefined values
+        mainPost.author?._id?.toString(),
       ].filter((id) => id !== undefined)
     );
 
     const uniqueCommunityIds = new Set(
       [
-        ...descendantThreads.map((thread) => thread.community?._id?.toString()), // Use optional chaining to handle possible undefined values
-        mainThread.community?._id?.toString(),
+        ...descendantPosts.map((post) => post.community?._id?.toString()), // Use optional chaining to handle possible undefined values
+        mainPost.community?._id?.toString(),
       ].filter((id) => id !== undefined)
     );
 
-    // Recursively delete child threads and their descendants
-    await Thread.deleteMany({ _id: { $in: descendantThreadIds } });
+    // Recursively delete child posts and their descendants
+    await Post.deleteMany({ _id: { $in: descendantPostIds } });
 
     // Update User model
     await User.updateMany(
       { _id: { $in: Array.from(uniqueAuthorIds) } },
-      { $pull: { threads: { $in: descendantThreadIds } } }
+      { $pull: { posts: { $in: descendantPostIds } } }
     );
 
     // Update Community model
     await Community.updateMany(
       { _id: { $in: Array.from(uniqueCommunityIds) } },
-      { $pull: { threads: { $in: descendantThreadIds } } }
+      { $pull: { posts: { $in: descendantPostIds } } }
     );
 
     revalidatePath(path);
   } catch (error: any) {
-    throw new Error(`Failed to delete thread: ${error.message}`);
+    throw new Error(`Failed to delete post: ${error.message}`);
   }
 }
 
-export async function fetchThreadById(threadId: string) {
+export async function fetchPostById(postId: string) {
   connectToDB();
 
   try {
-    const thread = await Thread.findById(threadId)
+    const post = await Post.findById(postId)
       .populate({
         path: "author",
         model: User,
@@ -1445,7 +1445,7 @@ export async function fetchThreadById(threadId: string) {
           },
           {
             path: "children", // Populate the children field within children
-            model: Thread, // The model of the nested children (assuming it's the same "Thread" model)
+            model: Post, // The model of the nested children (assuming it's the same "Post" model)
             populate: {
               path: "author", // Populate the author field within nested children
               model: User,
@@ -1456,15 +1456,15 @@ export async function fetchThreadById(threadId: string) {
       })
       .exec();
 
-    return thread;
+    return post;
   } catch (err) {
-    console.error("Error while fetching thread:", err);
-    throw new Error("Unable to fetch thread");
+    console.error("Error while fetching post:", err);
+    throw new Error("Unable to fetch post");
   }
 }
 
-export async function addCommentToThread(
-  threadId: string,
+export async function addCommentToPost(
+  postId: string,
   commentText: string,
   userId: string,
   path: string
@@ -1472,28 +1472,28 @@ export async function addCommentToThread(
   connectToDB();
 
   try {
-    // Find the original thread by its ID
-    const originalThread = await Thread.findById(threadId);
+    // Find the original post by its ID
+    const originalPost = await Post.findById(postId);
 
-    if (!originalThread) {
-      throw new Error("Thread not found");
+    if (!originalPost) {
+      throw new Error("Post not found");
     }
 
-    // Create the new comment thread
-    const commentThread = new Thread({
+    // Create the new comment post
+    const commentPost = new Post({
       text: commentText,
       author: userId,
-      parentId: threadId, // Set the parentId to the original thread's ID
+      parentId: postId, // Set the parentId to the original post's ID
     });
 
-    // Save the comment thread to the database
-    const savedCommentThread = await commentThread.save();
+    // Save the comment post to the database
+    const savedCommentPost = await commentPost.save();
 
-    // Add the comment thread's ID to the original thread's children array
-    originalThread.children.push(savedCommentThread._id);
+    // Add the comment post's ID to the original post's children array
+    originalPost.children.push(savedCommentPost._id);
 
-    // Save the updated original thread to the database
-    await originalThread.save();
+    // Save the updated original post to the database
+    await originalPost.save();
 
     revalidatePath(path);
   } catch (err) {
@@ -1531,7 +1531,7 @@ import { FilterQuery, SortOrder } from "mongoose";
 import { revalidatePath } from "next/cache";
 
 import Community from "../models/community.model";
-import Thread from "../models/thread.model";
+import Post from "../models/post.model";
 import User from "../models/user.model";
 
 import { connectToDB } from "../mongoose";
@@ -1593,10 +1593,10 @@ export async function fetchUserPosts(userId: string) {
   try {
     connectToDB();
 
-    // Find all threads authored by the user with the given userId
-    const threads = await User.findOne({ id: userId }).populate({
-      path: "threads",
-      model: Thread,
+    // Find all posts authored by the user with the given userId
+    const posts = await User.findOne({ id: userId }).populate({
+      path: "posts",
+      model: Post,
       populate: [
         {
           path: "community",
@@ -1605,7 +1605,7 @@ export async function fetchUserPosts(userId: string) {
         },
         {
           path: "children",
-          model: Thread,
+          model: Post,
           populate: {
             path: "author",
             model: User,
@@ -1614,9 +1614,9 @@ export async function fetchUserPosts(userId: string) {
         },
       ],
     });
-    return threads;
+    return posts;
   } catch (error) {
-    console.error("Error fetching user threads:", error);
+    console.error("Error fetching user posts:", error);
     throw error;
   }
 }
@@ -1684,18 +1684,18 @@ export async function getActivity(userId: string) {
   try {
     connectToDB();
 
-    // Find all threads created by the user
-    const userThreads = await Thread.find({ author: userId });
+    // Find all posts created by the user
+    const userPosts = await Post.find({ author: userId });
 
-    // Collect all the child thread ids (replies) from the 'children' field of each user thread
-    const childThreadIds = userThreads.reduce((acc, userThread) => {
-      return acc.concat(userThread.children);
+    // Collect all the child post ids (replies) from the 'children' field of each user post
+    const childPostIds = userPosts.reduce((acc, userPost) => {
+      return acc.concat(userPost.children);
     }, []);
 
-    // Find and return the child threads (replies) excluding the ones created by the same user
-    const replies = await Thread.find({
-      _id: { $in: childThreadIds },
-      author: { $ne: userId }, // Exclude threads authored by the same user
+    // Find and return the child posts (replies) excluding the ones created by the same user
+    const replies = await Post.find({
+      _id: { $in: childPostIds },
+      author: { $ne: userId }, // Exclude posts authored by the same user
     }).populate({
       path: "author",
       model: User,
@@ -1750,13 +1750,13 @@ export function formatDateString(dateString: string) {
 }
 
 // created by chatgpt
-export function formatThreadCount(count: number): string {
+export function formatPostCount(count: number): string {
   if (count === 0) {
-    return "No Threads";
+    return "No Posts";
   } else {
-    const threadCount = count.toString().padStart(2, "0");
-    const threadWord = count === 1 ? "Thread" : "Threads";
-    return `${threadCount} ${threadWord}`;
+    const postCount = count.toString().padStart(2, "0");
+    const postWord = count === 1 ? "Post" : "Posts";
+    return `${postCount} ${postWord}`;
   }
 }
 ```
